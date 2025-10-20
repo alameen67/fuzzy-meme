@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALAMEEN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /*
+        =============================
+        BASE & TYPOGRAPHY
+        =============================
+        */
+        :root {
+            --bg-color: #000000;
+            --text-color: #F0F0F0;
+            --highlight-color: #A0A0A0; 
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;700;900&display=swap');
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            /* Removed cursor: none; to use default system cursor */
+            perspective: 1500px;
+            transform-style: preserve-3d;
+        }
+
+        /* Re-enable default cursor for better mobile usability */
+        @media (max-width: 768px), (pointer: coarse) {
+            body {
+                cursor: default;
+                overflow-y: auto; /* Allow scrolling on mobile */
+            }
+        }
+
+        /*
+        =============================
+        FEATURE 1: BACKGROUND PARTICLES
+        =============================
+        */
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            transform-style: preserve-3d;
+            filter: blur(0.5px);
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--text-color);
+            border-radius: 50%;
+            will-change: transform;
+            opacity: var(--opacity, 0.8);
+        }
+
+        /*
+        =============================
+        FEATURE 2: HERO TITLE (SIZE FIXED)
+        =============================
+        */
+        .hero-section {
+            z-index: 10;
+            text-align: center;
+            transform-style: preserve-3d;
+            transform: translateZ(100px);
+            transition: transform 0.1s ease-out;
+            cursor: default;
+            padding: 2rem;
+            max-width: 90%;
+        }
+
+        .hero-title {
+            /* Reduced size: 3rem (mobile) up to 8rem (desktop) */
+            font-size: clamp(3rem, 12vw, 8rem); 
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 0.8em; 
+            margin-bottom: 2rem;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+            transition: transform 0.1s ease-out;
+            will-change: transform;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1));
+            user-select: none;
+        }
+
+        /*
+        =============================
+        FEATURE 3: CURSOR SYSTEM (REMOVED)
+        =============================
+        */
+
+        /* Click Ripple Effect (Kept, but simplified) */
+        .ripple {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            animation: ripple-pulse 0.6s ease-out forwards;
+            z-index: 1002;
+        }
+        @keyframes ripple-pulse {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(10); opacity: 0; }
+        }
+
+        /*
+        =============================
+        FEATURE 4: WEBHOOK MESSAGE BOX
+        =============================
+        */
+        .message-box-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 0 auto;
+        }
+
+        #message-input {
+            width: 100%;
+            height: 100px;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--text-color);
+            font-size: 1rem;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+
+        #message-input:focus {
+            outline: none;
+            border-color: var(--text-color);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        #send-button {
+            padding: 0.75rem 1.5rem;
+            background: var(--text-color);
+            color: var(--bg-color);
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        #send-button:hover:not(:disabled) {
+            background: var(--highlight-color);
+        }
+
+        #send-button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        #send-button:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            text-align: center;
+            font-size: 0.875rem;
+            min-height: 1.5rem;
+            transition: color 0.3s;
+        }
+
+        .status-message.success {
+            color: #4CAF50; /* Green */
+        }
+        .status-message.error {
+            color: #F44336; /* Red */
+        }
+        .status-message.loading {
+            color: var(--highlight-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- FEATURE 1: Particle Background Container -->
+    <div class="particle-container" id="particle-container"></div>
+    
+    <!-- FEATURE 5: Background Music Player -->
+    <audio id="background-music" src="https://github.com/alameen67/fuzzy-meme/raw/refs/heads/main/cope.mp3" autoplay loop></audio>
+
+    <!-- MAIN CONTENT -->
+    <main class="hero-section" id="hero-section">
+        <h1 class="hero-title" id="hero-title">ALAMEEN</h1>
+
+        <!-- FEATURE 4: Message Sender -->
+        <div class="message-box-container">
+            <textarea id="message-input" placeholder="Send a message to ALAMEEN (Max 1000 chars)" maxlength="1000"></textarea>
+            <button id="send-button">Send Message</button>
+            <div id="status-message" class="status-message"></div>
+        </div>
+    </main>
+
+    <!-- Removed: Custom Cursor Elements (cursor-ring and cursor-dot) -->
+
+    <script>
+        //
+        // =============================
+        // JAVASCRIPT LOGIC
+        // =============================
+        //
+
+        // --- GLOBAL ELEMENTS & VARIABLES ---
+        const particleContainer = document.getElementById('particle-container');
+        const heroSection = document.getElementById('hero-section');
+        const heroTitle = document.getElementById('hero-title');
+        
+        // Audio Element (Defined and volume set here)
+        const backgroundMusic = document.getElementById('background-music');
+        backgroundMusic.volume = 0.2; // Set volume to 20%
+        
+        // Webhook Elements
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1429913613593743374/MO119AsAt7px4nKJtZE2oCtfX6DN3VUyJzhE6Umykhjt9hbenI9hTyDNa1lrwSAALmTX';
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const statusMessage = document.getElementById('status-message');
+
+
+        // Particle Variables
+        const numParticles = 80;
+        const particles = [];
+        
+        // Mouse/Parallax Variables
+        let mouseX = 0;
+        let mouseY = 0;
+
+        // Check if device is touch-enabled
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        // --- 1. PARTICLE ANIMATION ---
+        function createParticles() {
+            for (let i = 0; i < numParticles; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const size = Math.random() * 3 + 1;
+                p.style.width = p.style.height = `${size}px`; 
+                p.depth = Math.random() * 200 + 50; 
+                p.style.setProperty('--opacity', Math.min(1, 0.4 + (p.depth / 250)));
+                p.x = Math.random() * window.innerWidth;
+                p.y = Math.random() * window.innerHeight;
+                p.style.transform = `translate3d(${p.x}px, ${p.y}px, ${p.depth}px)`;
+
+                particleContainer.appendChild(p);
+                particles.push(p);
+            }
+        }
+        
+        function animateParticles() {
+            const speedFactor = 0.5;
+            particles.forEach(p => {
+                p.y += (200 / p.depth) * speedFactor; 
+                p.x += Math.sin(p.y * 0.005) * 0.05; 
+
+                if (p.y > window.innerHeight) {
+                    p.y = -10;
+                    p.x = Math.random() * window.innerWidth;
+                }
+                p.style.transform = `translate3d(${p.x}px, ${p.y}px, ${p.depth}px)`;
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        // --- 2. MOUSE TRACKING & PARALLAX ---
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Parallax movement for background and title
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const x = (e.clientX - centerX) / centerX;
+            const y = (e.clientY - centerY) / centerY;
+
+            particleContainer.style.transform = `rotateX(${-y * 0.5}deg) rotateY(${x * 0.5}deg)`;
+            
+            heroSection.style.transform = `
+                translate3d(${x * 15}px, ${y * 15}px, 100px) 
+                rotateX(${-y * 5}deg) 
+                rotateY(${x * 5}deg)
+            `;
+            
+            // Title filter effect removed, simplified to static drop shadow
+        });
+
+        // --- 3. CLICK RIPPLE EFFECT ---
+        document.addEventListener('click', (e) => {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            ripple.style.left = `${e.clientX}px`;
+            ripple.style.top = `${e.clientY}px`;
+            document.body.appendChild(ripple);
+
+            ripple.addEventListener('animationend', () => {
+                ripple.remove();
+            });
+            
+            // Try to play music on first interaction (if blocked by browser)
+            if (backgroundMusic.paused) {
+                backgroundMusic.play().catch(error => {
+                    console.log('Autoplay was prevented, user interaction required:', error);
+                });
+            }
+        });
+
+        // --- 4. WEBHOOK FUNCTIONALITY ---
+
+        sendButton.addEventListener('click', sendMessage);
+
+        function displayStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            
+            // Clear message after 5 seconds unless it's a loading state
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusMessage.textContent = '';
+                    statusMessage.className = 'status-message';
+                }, 5000);
+            }
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) {
+                displayStatus('Message cannot be empty.', 'error');
+                return;
+            }
+
+            sendButton.disabled = true;
+            displayStatus('Sending...', 'loading');
+
+            try {
+                // Discord Webhook POST request
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: message,
+                        username: "ALAMEEN Website Guest",
+                        avatar_url: "https://placehold.co/128x128/000000/FFFFFF?text=A"
+                    })
+                });
+
+                if (response.ok) {
+                    displayStatus('Message sent successfully!', 'success');
+                    messageInput.value = ''; // Clear input
+                } else {
+                    // Discord returns 200 OK even on some minor errors, but usually 400+ on major issues
+                    console.error('Webhook failed (Status):', response.status);
+                    displayStatus(`Failed to send message: HTTP ${response.status}`, 'error');
+                }
+            } catch (error) {
+                console.error('Fetch network error:', error);
+                displayStatus('Network error. Could not reach server.', 'error');
+            } finally {
+                sendButton.disabled = false;
+            }
+        }
+
+
+        // --- INITIALIZATION ---
+        createParticles();
+        animateParticles();
+        
+    </script>
+
+</body>
+</html>
