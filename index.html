@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALAMEEN</title>
+    <title>ALAMEEN | Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /*
@@ -13,8 +13,9 @@
         */
         :root {
             --bg-color: #000000;
-            --text-color: #F0F0F0;
-            --highlight-color: #A0A0A0; 
+            --text-color: #FFFFFF; /* All text is pure white */
+            --portal-accent: #A08A4D; /* Gold/Bronze for accents */
+            --border-color: rgba(255, 255, 255, 0.1);
         }
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;700;900&display=swap');
@@ -25,27 +26,37 @@
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            /* Removed cursor: none; to use default system cursor */
+            overflow-y: scroll; 
+            overflow-x: hidden; 
+            min-height: 300vh; 
             perspective: 1500px;
             transform-style: preserve-3d;
+            scroll-snap-type: y mandatory; 
         }
 
-        /* Re-enable default cursor for better mobile usability */
-        @media (max-width: 768px), (pointer: coarse) {
-            body {
-                cursor: default;
-                overflow-y: auto; /* Allow scrolling on mobile */
-            }
+        /* --- General Animations and Smoothness --- */
+        button, .player-btn, .content-card, .music-player-container, #game-container {
+             cursor: pointer;
+             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* --- Viewport Sections --- */
+        .viewport-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            max-width: 100%;
+            scroll-snap-align: start; 
+            position: relative;
+            z-index: 10;
         }
 
         /*
         =============================
-        FEATURE 1: BACKGROUND PARTICLES
+        BACKGROUND & EFFECTS
         =============================
         */
         .particle-container {
@@ -57,60 +68,255 @@
             pointer-events: none;
             transform-style: preserve-3d;
             filter: blur(0.5px);
+            z-index: 0;
         }
 
         .particle {
             position: absolute;
-            background: var(--text-color);
+            background: var(--portal-accent);
             border-radius: 50%;
             will-change: transform;
             opacity: var(--opacity, 0.8);
         }
-
-        /*
-        =============================
-        FEATURE 2: HERO TITLE (SIZE FIXED)
-        =============================
-        */
-        .hero-section {
-            z-index: 10;
-            text-align: center;
-            transform-style: preserve-3d;
-            transform: translateZ(100px);
-            transition: transform 0.1s ease-out;
-            cursor: default;
-            padding: 2rem;
-            max-width: 90%;
-        }
-
+        
         .hero-title {
-            /* Reduced size: 3rem (mobile) up to 8rem (desktop) */
-            font-size: clamp(3rem, 12vw, 8rem); 
+            font-size: clamp(4rem, 15vw, 10rem); 
             font-weight: 300;
             text-transform: uppercase;
             letter-spacing: 0.8em; 
-            margin-bottom: 2rem;
             line-height: 1;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
-            transition: transform 0.1s ease-out;
-            will-change: transform;
-            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.1));
+            /* Gold Glow */
+            text-shadow: 0 0 15px rgba(160, 138, 77, 0.6); 
+            -webkit-text-stroke: 1px rgba(160, 138, 77, 0.1);
             user-select: none;
+            transition: transform 0.3s;
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 5vh;
+            text-align: center;
+            opacity: 0.5;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+
+        /*
+        =============================
+        SECTION 2: EMBEDDED GAME WINDOW
+        =============================
+        */
+        #game-container {
+            width: 95%; 
+            height: 85vh; 
+            max-width: 1200px;
+            background: rgba(0, 0, 0, 0.98);
+            /* Minimalist border/glow using the gold accent */
+            border: 2px solid var(--portal-accent);
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(160, 138, 77, 0.4); 
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin: auto; 
+        }
+        
+        .game-window-header {
+            display: flex;
+            justify-content: flex-start; /* Title is left-aligned */
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: #111; 
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        #game-iframe {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            allow="autoplay; fullscreen; microphone"; 
         }
 
         /*
         =============================
-        FEATURE 3: CURSOR SYSTEM (REMOVED)
+        SECTION 3: MUSIC PLAYER (Monochromatic)
         =============================
         */
+        .music-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center everything */
+            text-align: center;
+        }
+        
+        .music-section h2 {
+            font-size: clamp(2.5rem, 5vw, 3rem);
+            font-weight: 900;
+            margin-bottom: 3rem;
+            color: var(--text-color); /* White text */
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
 
-        /* Click Ripple Effect (Kept, but simplified) */
+        .music-player-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05); /* Very subtle dark background */
+            border: 1px solid var(--border-color); 
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); 
+            margin-bottom: 2rem;
+        }
+        .music-player-container:hover {
+            border-color: var(--portal-accent);
+            box-shadow: 0 0 25px rgba(160, 138, 77, 0.5); /* Gold glow on hover */
+        }
+        
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .player-status {
+            flex-grow: 1;
+            text-align: left;
+        }
+        
+        .player-status h3 {
+            font-weight: 700;
+            font-size: 1.125rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--portal-accent); /* Gold text for title */
+        }
+        
+        .player-status p {
+            font-size: 0.875rem;
+            color: var(--border-color); /* Lighter status text */
+        }
+
+        .player-btn {
+            background: var(--portal-accent);
+            color: var(--bg-color); /* Black text on gold buttons */
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .player-btn:hover {
+            background: #D4AF37; /* Brighter Gold */
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(160, 138, 77, 0.5);
+        }
+
+        .player-btn.active {
+            background: #6D5C2C; /* Darker Gold for active state */
+            color: white;
+            box-shadow: 0 0 10px #A08A4D;
+            transform: scale(0.95);
+        }
+
+        .volume-control-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-top: 1px solid var(--border-color); 
+            padding-top: 1rem;
+        }
+        
+        .volume-control-row svg {
+            color: var(--portal-accent);
+        }
+
+        #volume-slider {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            height: 5px;
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--portal-accent);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px var(--portal-accent);
+        }
+
+        /* --- Gallery Grid --- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Adjusted card size for centering */
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.03);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid transparent;
+            transition: all 0.3s ease-in-out;
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+        
+        .content-card img {
+            border-radius: 4px;
+            width: 100%;
+            height: auto;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7), 0 0 20px rgba(160, 138, 77, 0.6); 
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--portal-accent);
+        }
+        
+        .content-card.playing {
+            border: 3px solid var(--portal-accent);
+            box-shadow: 0 0 40px var(--portal-accent);
+            background: rgba(160, 138, 77, 0.1);
+            animation: pulse-border 1.5s infinite alternate;
+        }
+
+        @keyframes pulse-border {
+            from { border-color: var(--portal-accent); box-shadow: 0 0 20px var(--portal-accent); }
+            to { border-color: #D4AF37; box-shadow: 0 0 35px #D4AF37; }
+        }
+
+        .content-info {
+            padding-top: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+
+        /* --- Ripple CSS --- */
         .ripple {
             position: fixed;
             width: 10px;
             height: 10px;
-            background: rgba(255, 255, 255, 0.8);
+            background: var(--portal-accent);
             border-radius: 50%;
             pointer-events: none;
             transform: translate(-50%, -50%);
@@ -121,89 +327,6 @@
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.8; }
             100% { transform: translate(-50%, -50%) scale(10); opacity: 0; }
         }
-
-        /*
-        =============================
-        FEATURE 4: WEBHOOK MESSAGE BOX
-        =============================
-        */
-        .message-box-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin: 0 auto;
-        }
-
-        #message-input {
-            width: 100%;
-            height: 100px;
-            padding: 0.75rem;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(0, 0, 0, 0.5);
-            color: var(--text-color);
-            font-size: 1rem;
-            resize: none;
-            transition: border-color 0.3s;
-        }
-
-        #message-input:focus {
-            outline: none;
-            border-color: var(--text-color);
-            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-        }
-
-        #send-button {
-            padding: 0.75rem 1.5rem;
-            background: var(--text-color);
-            color: var(--bg-color);
-            font-weight: 700;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.1s;
-        }
-
-        #send-button:hover:not(:disabled) {
-            background: var(--highlight-color);
-        }
-
-        #send-button:active:not(:disabled) {
-            transform: scale(0.98);
-        }
-
-        #send-button:disabled {
-            background: #444;
-            color: #888;
-            cursor: not-allowed;
-        }
-
-        .status-message {
-            text-align: center;
-            font-size: 0.875rem;
-            min-height: 1.5rem;
-            transition: color 0.3s;
-        }
-
-        .status-message.success {
-            color: #4CAF50; /* Green */
-        }
-        .status-message.error {
-            color: #F44336; /* Red */
-        }
-        .status-message.loading {
-            color: var(--highlight-color);
-        }
-
     </style>
 </head>
 <body>
@@ -211,23 +334,77 @@
     <!-- FEATURE 1: Particle Background Container -->
     <div class="particle-container" id="particle-container"></div>
     
-    <!-- FEATURE 5: Background Music Player -->
-    <audio id="background-music" src="https://github.com/alameen67/fuzzy-meme/raw/refs/heads/main/cope.mp3" autoplay loop></audio>
+    <!-- AUDIO ELEMENT (Dedicated for the Music Gallery) -->
+    <audio id="dynamic-audio-player"></audio>
 
-    <!-- MAIN CONTENT -->
-    <main class="hero-section" id="hero-section">
-        <h1 class="hero-title" id="hero-title">ALAMEEN</h1>
-
-        <!-- FEATURE 4: Message Sender -->
-        <div class="message-box-container">
-            <textarea id="message-input" placeholder="Send a message to ALAMEEN (Max 1000 chars)" maxlength="1000"></textarea>
-            <button id="send-button">Send Message</button>
-            <div id="status-message" class="status-message"></div>
+    <!-- SECTION 1: HERO VIEWPORT -->
+    <div class="viewport-section" id="section-alameen">
+        <main class="hero-section" id="hero-section">
+            <h1 class="hero-title" id="hero-title">ALAMEEN</h1>
+        </main>
+        <div class="scroll-indicator">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+            <p class="text-sm">Embedded Game</p>
         </div>
-    </main>
+    </div>
+    
+    <!-- SECTION 2: EMBEDDED MINECRAFT GAME -->
+    <div class="viewport-section" id="game-section">
+        <h2 class="text-4xl font-extrabold mb-8 text-white" style="text-shadow: 0 0 10px rgba(255,255,255,0.2);">Play Minecraft World</h2>
+        
+        <div id="game-container">
+            <div class="game-window-header">
+                <!-- Title element -->
+                <span class="text-lg font-bold text-white">Minecraft World Launcher (mc.html)</span>
+                <!-- Mute controls removed as requested -->
+            </div>
+            <!-- The iframe loads your mc.html file directly within this section -->
+            <iframe id="game-iframe" src="about:blank" frameborder="0" allow="autoplay; fullscreen"></iframe>
+        </div>
+        
+        <div class="scroll-indicator mt-8">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+            <p class="text-sm">Music Gallery</p>
+        </div>
+    </div>
 
-    <!-- Removed: Custom Cursor Elements (cursor-ring and cursor-dot) -->
+    <!-- SECTION 3: MUSIC GALLERY VIEWPORT -->
+    <div class="viewport-section" id="section-gallery">
+        <div class="music-section">
+            <!-- Title changed and theme simplified -->
+            <h2>ALAMEEN's Favorite Songs</h2>
+            
+            <div class="music-player-container">
+                <!-- Music Controls -->
+                <div class="controls-row">
+                    <button id="play-pause-button" class="player-btn" onclick="togglePlayPause()">Play</button>
+                    <button id="stop-button" class="player-btn" onclick="stopMusic()">Stop</button>
+                    <button id="repeat-button" class="player-btn p-3" onclick="toggleRepeat()" title="Toggle Repeat Song">
+                        <!-- Repeat Icon (Lucide repeat) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"></path><path d="M3 11v-1a4 4 0 0 1 4-4h14"></path><path d="m7 22-4-4 4-4"></path><path d="M21 13v1a4 4 0 0 1-4 4H3"></path></svg>
+                    </button>
+                    <div class="player-status">
+                        <h3 id="current-track-title">No Track Selected</h3>
+                        <p id="current-status">Stopped</p>
+                    </div>
+                </div>
+                
+                <!-- Volume Controls -->
+                <div class="volume-control-row">
+                    <!-- Volume Icon -->
+                    <svg id="volume-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="setVolume(this.value)">
+                    <!-- Player Mute button removed for ultimate minimalism -->
+                </div>
+            </div>
 
+            <!-- Content Grid (Music Gallery) -->
+            <div id="content-grid" class="content-grid">
+                <!-- Music cards will be injected here by JS -->
+            </div>
+        </div>
+    </div>
+    
     <script>
         //
         // =============================
@@ -238,38 +415,42 @@
         // --- GLOBAL ELEMENTS & VARIABLES ---
         const particleContainer = document.getElementById('particle-container');
         const heroSection = document.getElementById('hero-section');
-        const heroTitle = document.getElementById('hero-title');
+        const contentGrid = document.getElementById('content-grid');
         
-        // Audio Element (Defined and volume set here)
-        const backgroundMusic = document.getElementById('background-music');
-        backgroundMusic.volume = 0.2; // Set volume to 20%
+        // Audio Elements
+        const audioPlayer = document.getElementById('dynamic-audio-player');
+        const playPauseButton = document.getElementById('play-pause-button');
+        const repeatButton = document.getElementById('repeat-button');
+        const stopButton = document.getElementById('stop-button');
+        const currentTrackTitle = document.getElementById('current-track-title');
+        const currentStatus = document.getElementById('current-status');
+        const volumeSlider = document.getElementById('volume-slider');
+        let currentTrackId = null; 
         
-        // Webhook Elements
-        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1429913613593743374/MO119AsAt7px4nKJtZE2oCtfX6DN3VUyJzhE6Umykhjt9hbenI9hTyDNa1lrwSAALmTX';
-        const messageInput = document.getElementById('message-input');
-        const sendButton = document.getElementById('send-button');
-        const statusMessage = document.getElementById('status-message');
-
-
+        // Game Window Elements
+        const iframe = document.getElementById('game-iframe');
+        
         // Particle Variables
         const numParticles = 80;
         const particles = [];
         
-        // Mouse/Parallax Variables
-        let mouseX = 0;
-        let mouseY = 0;
+        // --- MUSIC TRACK CONFIGURATION ---
+        const musicTracks = [
+            { id: 1, title: "Call Me Maybe", cover: "https://github.com/alameen67/udududuududud/blob/main/Call%20Me%20Maybe.jpg?raw=true", audio: "https://github.com/alameen67/udududuududud/raw/refs/heads/main/Call%20Me%20Maybe.mp3" },
+            { id: 2, title: "Cheap Thrills", cover: "https://github.com/alameen67/udududuududud/blob/main/Cheap%20Thrills.jpg?raw=true", audio: "https://github.com/alameen67/udududuududud/raw/refs/heads/main/Cheap%20Thrills.mp3" },
+            { id: 3, title: "Espresso", cover: "https://github.com/alameen67/udududuududud/blob/main/Espresso.jpg?raw=true", audio: "https://github.com/alameen67/udududuududud/raw/refs/heads/main/Espresso.mp3" },
+            { id: 4, title: "No Era Amor", cover: "https://github.com/alameen67/udududuududud/blob/main/No%20Era%20Amor.jpg?raw=true", audio: "https://github.com/alameen67/udududuududud/raw/refs/heads/main/No%20Era%20Amor.mp3" },
+        ];
 
-        // Check if device is touch-enabled
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-        // --- 1. PARTICLE ANIMATION ---
+        // --- PARTICLE & PARALLAX LOGIC ---
         function createParticles() {
             for (let i = 0; i < numParticles; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
                 const size = Math.random() * 3 + 1;
-                p.style.width = p.style.height = `${size}px`; 
                 p.depth = Math.random() * 200 + 50; 
+                p.style.width = p.style.height = `${size}px`; 
                 p.style.setProperty('--opacity', Math.min(1, 0.4 + (p.depth / 250)));
                 p.x = Math.random() * window.innerWidth;
                 p.y = Math.random() * window.innerHeight;
@@ -295,107 +476,160 @@
             requestAnimationFrame(animateParticles);
         }
 
-        // --- 2. MOUSE TRACKING & PARALLAX ---
         document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            
-            // Parallax movement for background and title
             const centerX = window.innerWidth / 2;
             const centerY = window.innerHeight / 2;
             const x = (e.clientX - centerX) / centerX;
             const y = (e.clientY - centerY) / centerY;
-
             particleContainer.style.transform = `rotateX(${-y * 0.5}deg) rotateY(${x * 0.5}deg)`;
-            
-            heroSection.style.transform = `
-                translate3d(${x * 15}px, ${y * 15}px, 100px) 
-                rotateX(${-y * 5}deg) 
-                rotateY(${x * 5}deg)
-            `;
-            
-            // Title filter effect removed, simplified to static drop shadow
+            heroSection.style.transform = `translate3d(${x * 5}px, ${y * 5}px, 0px)`;
         });
 
-        // --- 3. CLICK RIPPLE EFFECT ---
         document.addEventListener('click', (e) => {
             const ripple = document.createElement('div');
             ripple.className = 'ripple';
             ripple.style.left = `${e.clientX}px`;
             ripple.style.top = `${e.clientY}px`;
             document.body.appendChild(ripple);
-
-            ripple.addEventListener('animationend', () => {
-                ripple.remove();
-            });
-            
-            // Try to play music on first interaction (if blocked by browser)
-            if (backgroundMusic.paused) {
-                backgroundMusic.play().catch(error => {
-                    console.log('Autoplay was prevented, user interaction required:', error);
-                });
-            }
+            ripple.addEventListener('animationend', () => { ripple.remove(); });
+        });
+        
+        // --- MUSIC PLAYER LOGIC ---
+        audioPlayer.addEventListener('ended', () => {
+            updatePlayerDisplay(false, "Finished");
+            playPauseButton.textContent = 'Play';
         });
 
-        // --- 4. WEBHOOK FUNCTIONALITY ---
+        function updatePlayerDisplay(isPlaying, statusText = null) {
+            const currentTrack = musicTracks.find(t => t.id === currentTrackId);
+            const allCards = document.querySelectorAll('.content-card');
 
-        sendButton.addEventListener('click', sendMessage);
-
-        function displayStatus(message, type) {
-            statusMessage.textContent = message;
-            statusMessage.className = `status-message ${type}`;
+            allCards.forEach(card => card.classList.remove('playing'));
             
-            // Clear message after 5 seconds unless it's a loading state
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    statusMessage.textContent = '';
-                    statusMessage.className = 'status-message';
-                }, 5000);
+            if (currentTrack) {
+                currentTrackTitle.textContent = currentTrack.title;
+                const playingCard = document.querySelector(`.content-card[data-id="${currentTrackId}"]`);
+                if (playingCard) {
+                    playingCard.classList.add('playing');
+                }
+            } else {
+                currentTrackTitle.textContent = 'No Track Selected';
             }
+
+            if (isPlaying) {
+                playPauseButton.textContent = 'Pause';
+                currentStatus.textContent = 'Playing';
+            } else {
+                playPauseButton.textContent = 'Play';
+                if (statusText) {
+                    currentStatus.textContent = statusText;
+                } else if (audioPlayer.currentTime > 0) {
+                     currentStatus.textContent = 'Paused';
+                } else {
+                    currentStatus.textContent = 'Stopped';
+                }
+            }
+            repeatButton.classList.toggle('active', audioPlayer.loop);
         }
 
-        async function sendMessage() {
-            const message = messageInput.value.trim();
-            if (!message) {
-                displayStatus('Message cannot be empty.', 'error');
+        function playTrack(trackId) {
+            const track = musicTracks.find(t => t.id === trackId);
+            if (!track) return;
+
+            if (currentTrackId !== trackId || audioPlayer.paused) {
+                audioPlayer.src = track.audio;
+                audioPlayer.load(); 
+            }
+            
+            audioPlayer.play().then(() => {
+                currentTrackId = trackId;
+                updatePlayerDisplay(true);
+            }).catch(error => {
+                console.error("Audio playback failed:", error);
+                currentStatus.textContent = "Error playing audio.";
+            });
+        }
+        
+        function togglePlayPause() {
+            if (!currentTrackId) {
+                playTrack(musicTracks[0].id); 
                 return;
             }
 
-            sendButton.disabled = true;
-            displayStatus('Sending...', 'loading');
+            if (audioPlayer.paused) {
+                audioPlayer.play().then(() => updatePlayerDisplay(true))
+                .catch(error => console.error("Play failed:", error));
+            } else {
+                audioPlayer.pause();
+                updatePlayerDisplay(false, "Paused");
+            }
+        }
+        
+        function stopMusic() {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            updatePlayerDisplay(false, "Stopped");
+            document.querySelectorAll('.content-card').forEach(card => card.classList.remove('playing'));
+        }
 
-            try {
-                // Discord Webhook POST request
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: message,
-                        username: "ALAMEEN Website Guest",
-                        avatar_url: "https://placehold.co/128x128/000000/FFFFFF?text=A"
-                    })
-                });
+        function toggleRepeat() {
+            audioPlayer.loop = !audioPlayer.loop;
+            repeatButton.classList.toggle('active', audioPlayer.loop);
+        }
 
-                if (response.ok) {
-                    displayStatus('Message sent successfully!', 'success');
-                    messageInput.value = ''; // Clear input
-                } else {
-                    // Discord returns 200 OK even on some minor errors, but usually 400+ on major issues
-                    console.error('Webhook failed (Status):', response.status);
-                    displayStatus(`Failed to send message: HTTP ${response.status}`, 'error');
-                }
-            } catch (error) {
-                console.error('Fetch network error:', error);
-                displayStatus('Network error. Could not reach server.', 'error');
-            } finally {
-                sendButton.disabled = false;
+        function setVolume(value) {
+            audioPlayer.volume = parseFloat(value);
+            // Volume icon update based on volume level
+            const volumeIcon = document.getElementById('volume-icon');
+            if (audioPlayer.volume === 0) {
+                volumeIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" y1="9" x2="16" y2="15"></line><line x1="16" y1="9" x2="22" y2="15"></line>';
+            } else if (audioPlayer.volume < 0.5) {
+                volumeIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
+            } else {
+                volumeIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
             }
         }
 
+        // --- GALLERY INJECTION LOGIC ---
+        function renderMusicGallery() {
+            musicTracks.forEach(track => {
+                const card = document.createElement('div');
+                card.className = 'content-card';
+                card.dataset.id = track.id;
+                card.onclick = () => playTrack(track.id);
+                
+                card.innerHTML = `
+                    <img class="cover-image" src="${track.cover}" alt="${track.title} Cover" onerror="this.onerror=null; this.src='https://placehold.co/150x150/111111/A08A4D?text=TRACK';">
+                    <div class="content-info">
+                        <div class="content-title">${track.title}</div>
+                    </div>
+                `;
+                contentGrid.appendChild(card);
+            });
+        }
+
+        // --- GAME WINDOW LOGIC (Embedded, Auto-Load) ---
+        function loadEmbeddedGame() {
+            iframe.src = 'mc.html';
+            // Setting initial volume icon state
+            setVolume(audioPlayer.volume);
+            iframe.focus(); 
+        }
 
         // --- INITIALIZATION ---
-        createParticles();
-        animateParticles();
+        window.onload = function() {
+            createParticles();
+            animateParticles();
+            renderMusicGallery();
+            
+            // AUTOMATICALLY LOAD THE EMBEDDED MINECRAFT GAME
+            loadEmbeddedGame(); 
+            
+            // Set initial volume
+            audioPlayer.volume = parseFloat(volumeSlider.value);
+            updatePlayerDisplay(false);
+            setVolume(audioPlayer.volume); // Update visual volume icon
+        }
         
     </script>
 
